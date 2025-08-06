@@ -4,6 +4,7 @@ import com.gregtechceu.gtceu.utils.GTUtil;
 
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,6 +29,7 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
             .unmodifiableMap(nodeByBlockPos);
     private final Object2IntOpenHashMap<ChunkPos> ownedChunks = new Object2IntOpenHashMap<>();
     private long lastUpdate;
+    @Getter
     boolean isValid = false;
 
     public PipeNet(LevelPipeNet<NodeDataType, ? extends PipeNet<NodeDataType>> Level) {
@@ -39,20 +41,8 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
         return Collections.unmodifiableSet(ownedChunks.keySet());
     }
 
-    public LevelPipeNet<NodeDataType, PipeNet<NodeDataType>> getWorldData() {
-        return worldData;
-    }
-
     public ServerLevel getLevel() {
         return worldData.getWorld();
-    }
-
-    public long getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public boolean isValid() {
-        return isValid;
     }
 
     /**

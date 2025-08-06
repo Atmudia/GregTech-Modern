@@ -70,7 +70,7 @@ public class OpticalPipeBlockEntity extends PipeBlockEntity<OpticalPipeType, Opt
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
+    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction facing) {
         if (capability == GTCapability.CAPABILITY_DATA_ACCESS) {
             if (level.isClientSide) {
                 return GTCapability.CAPABILITY_DATA_ACCESS.orEmpty(capability,
@@ -137,7 +137,7 @@ public class OpticalPipeBlockEntity extends PipeBlockEntity<OpticalPipeType, Opt
     }
 
     @Override
-    public void setConnection(Direction side, boolean connected, boolean fromNeighbor) {
+    public void setConnection(@NotNull Direction side, boolean connected, boolean fromNeighbor) {
         if (!getLevel().isClientSide && connected && !fromNeighbor) {
             // never allow more than two connections total
             if (getNumConnections() >= 2) return;
@@ -180,12 +180,12 @@ public class OpticalPipeBlockEntity extends PipeBlockEntity<OpticalPipeType, Opt
     }
 
     @Override
-    public GTToolType getPipeTuneTool() {
+    public @NotNull GTToolType getPipeTuneTool() {
         return GTToolType.WIRE_CUTTER;
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
+    public @NotNull ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
     }
 

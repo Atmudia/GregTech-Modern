@@ -24,16 +24,19 @@ public class EnergyRoutePath implements IRoutePath<IEnergyContainer> {
     @Getter
     private final CableBlockEntity[] path;
     @Getter
+    private final long lowestVoltage;
+    @Getter
     private final long maxLoss;
 
     public EnergyRoutePath(BlockPos targetPipePos, Direction targetFacing, CableBlockEntity[] path, int distance,
-                           long maxLoss) {
+                           long maxLoss, long lowestVoltage) {
         this.targetPipe = path[path.length - 1];
         this.targetPipePos = targetPipePos;
         this.targetFacing = targetFacing;
         this.path = path;
         this.distance = distance;
         this.maxLoss = maxLoss;
+        this.lowestVoltage = lowestVoltage;
     }
 
     @Nullable

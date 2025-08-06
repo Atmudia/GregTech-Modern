@@ -32,9 +32,9 @@ public class CableData implements IAttachData {
         var result = canAttachTo(side);
         if (result != attach) {
             if (attach) {
-                connections |= (1 << side.ordinal());
+                connections |= (byte) (1 << side.ordinal());
             } else {
-                connections &= ~(1 << side.ordinal());
+                connections &= (byte) ~(1 << side.ordinal());
             }
         }
         return result != attach;

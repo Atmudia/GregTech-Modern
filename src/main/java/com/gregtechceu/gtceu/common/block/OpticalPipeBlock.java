@@ -13,6 +13,7 @@ import com.gregtechceu.gtceu.common.pipelike.optical.LevelOpticalPipeNet;
 import com.gregtechceu.gtceu.common.pipelike.optical.OpticalPipeProperties;
 import com.gregtechceu.gtceu.common.pipelike.optical.OpticalPipeType;
 
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class OpticalPipeBlock extends PipeBlock<OpticalPipeType, OpticalPipeProperties, LevelOpticalPipeNet> {
 
     public final PipeBlockRenderer renderer;

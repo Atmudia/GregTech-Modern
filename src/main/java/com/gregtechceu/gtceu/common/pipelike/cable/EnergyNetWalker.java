@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.common.pipelike.cable;
 
 import com.gregtechceu.gtceu.GTCEu;
+import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 import com.gregtechceu.gtceu.api.capability.forge.GTCapability;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.WireProperties;
@@ -35,6 +36,7 @@ public class EnergyNetWalker extends PipeNetWalker<CableBlockEntity, WirePropert
     private final List<EnergyRoutePath> routes;
     private CableBlockEntity[] pipes = {};
     private int loss;
+    private long maxVoltage = GTValues.V[GTValues.MAX];
 
     public EnergyNetWalker(EnergyNet pipeNet, BlockPos sourcePipe, int walkedBlocks, List<EnergyRoutePath> routes) {
         super(pipeNet, sourcePipe, walkedBlocks);
@@ -56,6 +58,7 @@ public class EnergyNetWalker extends PipeNetWalker<CableBlockEntity, WirePropert
     @Override
     protected void checkPipe(CableBlockEntity pipeTile, BlockPos pos) {
         pipes = ArrayUtils.add(pipes, pipeTile);
+        if (pipeTile.getMaxVoltage() < maxVoltage) maxVoltage = pipeTile.getMaxVoltage();
         loss += pipeTile.getNodeData().getLossPerBlock();
     }
 
@@ -71,7 +74,7 @@ public class EnergyNetWalker extends PipeNetWalker<CableBlockEntity, WirePropert
                     .getCapability(GTCapability.CAPABILITY_ENERGY_CONTAINER, faceToNeighbour.getOpposite()).resolve()
                     .orElse(null);
             if (container != null) {
-                routes.add(new EnergyRoutePath(pipePos.immutable(), faceToNeighbour, pipes, getWalkedBlocks(), loss));
+                routes.add(new EnergyRoutePath(pipePos.immutable(), faceToNeighbour, pipes, getWalkedBlocks(), loss, maxVoltage));
             }
         }
     }

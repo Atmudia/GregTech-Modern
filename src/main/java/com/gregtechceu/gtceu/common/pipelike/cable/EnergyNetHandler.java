@@ -5,6 +5,7 @@ import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 import com.gregtechceu.gtceu.common.blockentity.CableBlockEntity;
 import com.gregtechceu.gtceu.utils.GTUtil;
 
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,6 +16,7 @@ import java.util.Objects;
 
 public class EnergyNetHandler implements IEnergyContainer {
 
+    @Getter
     private EnergyNet net;
     private boolean transfer;
     private final CableBlockEntity cable;
@@ -24,10 +26,6 @@ public class EnergyNetHandler implements IEnergyContainer {
         this.net = Objects.requireNonNull(net);
         this.cable = Objects.requireNonNull(cable);
         this.facing = facing;
-    }
-
-    public EnergyNet getNet() {
-        return net;
     }
 
     public void updateNetwork(EnergyNet net) {
@@ -49,43 +47,37 @@ public class EnergyNetHandler implements IEnergyContainer {
 
         long amperesUsed = 0L;
         for (EnergyRoutePath path : net.getNetData(cable.getPipePos())) {
-            if (path.getMaxLoss() >= voltage) {
-                // Will lose all the energy with this path, so don't use it
-                continue;
-            }
+            // Will lose all the energy with this path, so don't use it
+            if (path.getMaxLoss() >= voltage) continue;
 
-            if (cable.getPipePos().equals(path.getTargetPipePos()) && side == path.getTargetFacing()) {
-                // Do not insert into source handler
-                continue;
-            }
+            // Do not insert into source handler
+            if (cable.getPipePos().equals(path.getTargetPipePos()) && side == path.getTargetFacing()) continue;
 
             IEnergyContainer dest = path.getHandler(getNet().getLevel());
             if (dest == null) continue;
 
             Direction facing = path.getTargetFacing().getOpposite();
             if (!dest.inputsEnergy(facing) || dest.getEnergyCanBeInserted() <= 0) continue;
-
             long pathVoltage = voltage - path.getMaxLoss();
-            boolean cableBroken = false;
-            for (CableBlockEntity cable : path.getPath()) {
-                if (cable.getMaxVoltage() < voltage) {
-                    int heat = (int) (Math.log(
-                            GTUtil.getTierByVoltage(voltage) - GTUtil.getTierByVoltage(cable.getMaxVoltage())) *
-                            45 + 36.5);
-                    cable.applyHeat(heat);
 
-                    cableBroken = cable.isInValid();
-                    if (cableBroken) {
-                        // a cable burned away (or insulation melted)
-                        break;
+            if (path.getLowestVoltage() < voltage) {
+                boolean cableBroken = false;
+                for (CableBlockEntity cable : path.getPath()) {
+                    if (cable.getMaxVoltage() < voltage) {
+                        int heat = (int) (Math.log(
+                                GTUtil.getTierByVoltage(voltage) - GTUtil.getTierByVoltage(cable.getMaxVoltage())) *
+                                45 + 36.5);
+                        cable.applyHeat(heat);
+
+                        cableBroken = cable.isInValid();
+                        if (cableBroken) break;
+
+                        // limit transfer to cables max and void rest
+                        pathVoltage = Math.min(cable.getMaxVoltage(), pathVoltage);
                     }
-
-                    // limit transfer to cables max and void rest
-                    pathVoltage = Math.min(cable.getMaxVoltage(), pathVoltage);
                 }
+                if (cableBroken) continue;
             }
-
-            if (cableBroken) continue;
 
             transfer = true;
             long amps = dest.acceptEnergyFromNetwork(facing, pathVoltage, amperage - amperesUsed);
@@ -108,15 +100,6 @@ public class EnergyNetHandler implements IEnergyContainer {
 
         net.addEnergyFluxPerSec(amperesUsed * voltage);
         return amperesUsed;
-    }
-
-    private void burnCable(ServerLevel serverLevel, BlockPos pos) {
-        serverLevel.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState());
-        if (!getNet().getLevel().isClientSide) {
-            getNet().getLevel().sendParticles(ParticleTypes.LARGE_SMOKE,
-                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    5 + getNet().getLevel().random.nextInt(3), 0.0, 0.0, 0.0, 0.1);
-        }
     }
 
     @Override
